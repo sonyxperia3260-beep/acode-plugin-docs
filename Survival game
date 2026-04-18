@@ -1,0 +1,137 @@
+    <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sisa Terakhir: Arktik (Weapon Update)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a2a3a; color: white; text-align: center; padding: 20px; }
+        .stats-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 20px; background: #2c3e50; padding: 15px; border-radius: 10px; border: 2px solid #34495e; }
+        .stat { font-size: 1.1rem; font-weight: bold; }
+        #log { height: 250px; background: #000; padding: 10px; border-radius: 5px; overflow-y: auto; text-align: left; margin-bottom: 20px; border: 1px solid #555; font-family: 'Courier New', Courier, monospace; color: #00ff00; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { padding: 15px; font-size: 1rem; cursor: pointer; border: none; border-radius: 5px; background: #3498db; color: white; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #2980b9; }
+        .btn-craft { background: #8e44ad; }
+        .btn-craft:hover { background: #7d3c98; }
+        .critical { color: #e74c3c; font-weight: bold; }
+        .success { color: #f1c40f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>❄️ Sisa Terakhir: Arktik</h1>
+    <p>Gunakan senjata untuk bertahan dari serangan serigala!</p>
+
+    <div class="stats-container">
+        <div class="stat">❤️ HP: <span id="hp">100</span></div>
+        <div class="stat">🪵 Kayu: <span id="kayu">10</span></div>
+        <div class="stat">🍖 Makan: <span id="makanan">5</span></div>
+        <div class="stat">⚔️ Tombak: <span id="senjata">0</span></div>
+        <div class="stat">📅 Hari: <span id="hari">1</span></div>
+    </div>
+
+    <div id="log">Kamu terbangun di stasiun penelitian yang dingin. Bekali dirimu!</div>
+
+    <div class="actions" id="action-buttons">
+        <button onclick="cariKayu()">🪵 Cari Kayu</button>
+        <button onclick="cariMakanan()">🍖 Cari Makanan</button>
+        <button onclick="istirahat()">🔥 Istirahat</button>
+        <button class="btn-craft" onclick="buatSenjata()">⚔️ Buat Tombak (5 Kayu)</button>
+    </div>
+
+    <script>
+        let hp = 100;
+        let kayu = 10;
+        let makanan = 5;
+        let senjata = 0;
+        let hari = 1;
+
+        function updateDisplay() {
+            document.getElementById('hp').innerText = hp;
+            document.getElementById('kayu').innerText = kayu;
+            document.getElementById('makanan').innerText = makanan;
+            document.getElementById('senjata').innerText = senjata;
+            document.getElementById('hari').innerText = hari;
+
+            if (hp <= 0) {
+                hp = 0;
+                addLog("<span class='critical'>GAME OVER. Serigala atau dingin telah mengalahkanmu...</span>");
+                document.getElementById('action-buttons').style.display = 'none';
+            }
+        }
+
+        function addLog(msg) {
+            const logBox = document.getElementById('log');
+            logBox.innerHTML += `<div>> ${msg}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function hariBerlalu() {
+            hari++;
+            if (kayu > 0) {
+                kayu -= 1;
+            } else {
+                hp -= 15;
+                addLog("<span class='critical'>API PADAM! Kamu membeku!</span>");
+            }
+            updateDisplay();
+        }
+
+        function buatSenjata() {
+            if (kayu >= 5) {
+                kayu -= 5;
+                senjata += 1;
+                addLog("<span class='success'>Kamu meruncingkan kayu menjadi tombak tajam!</span>");
+                updateDisplay();
+            } else {
+                addLog("Kayu tidak cukup untuk membuat tombak.");
+            }
+        }
+
+        function cariKayu() {
+            let dapat = Math.floor(Math.random() * 4) + 3;
+            kayu += dapat;
+            hp -= 5;
+            addLog(`Mencari kayu... Dapat ${dapat} batang.`);
+            hariBerlalu();
+        }
+
+        function cariMakanan() {
+            addLog("Kamu pergi berburu ke hutan salju...");
+            
+            // Peluang bertemu serigala (40%)
+            if (Math.random() < 0.4) {
+                addLog("<span class='critical'>⚠️ SERIGALA SALJU MUNCUL!</span>");
+                if (senjata > 0) {
+                    senjata -= 1;
+                    addLog("<span class='success'>Kamu melawan dengan tombak! Serigala lari, tapi tombakmu patah.</span>");
+                    makanan += 5;
+                } else {
+                    let luka = Math.floor(Math.random() * 20) + 15;
+                    hp -= luka;
+                    addLog(`<span class='critical'>Kamu tidak punya senjata! Serigala menggigitmu (HP -${luka}).</span>`);
+                }
+            } else {
+                let dapat = Math.floor(Math.random() * 3) + 2;
+                makanan += dapat;
+                addLog(`Berburu berhasil, kamu menemukan ${dapat} daging.`);
+            }
+            hp -= 10;
+            hariBerlalu();
+        }
+
+        function istirahat() {
+            if (makanan > 0 && kayu > 0) {
+                makanan -= 1;
+                hp = Math.min(100, hp + 15);
+                addLog("Makan dan tidur di dekat api. HP pulih.");
+            } else {
+                addLog("Gagal istirahat (Butuh makanan & api).");
+            }
+            hariBerlalu();
+        }
+    </script>
+</body>
+</html>
+       
